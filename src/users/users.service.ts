@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable,BadRequestException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/users.entity';
@@ -20,7 +20,7 @@ export class UsersService {
         });
 
         if (existing) {
-            throw new BadRequestException('Email already in use');
+            throw new BadRequestException('Este correo ya está registrado');
         }
 
         const hashed = await bcrypt.hash(createUserDto.password, 10);
@@ -60,7 +60,7 @@ export class UsersService {
 
         })
         return {
-            message: `Usuario ${id} eliminado`
+            message: `Usuario ${id} eliminado...`
         }
     }
 
