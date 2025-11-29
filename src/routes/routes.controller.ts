@@ -1,4 +1,44 @@
-import { Controller } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+
+import { RoutesService } from './routes.service';
+import { CreateRouteDto } from './dto/create-routes.dto';
+import { UpdateRouteDto } from './dto/update-routes.dto';
+
 
 @Controller('routes')
-export class RoutesController {}
+export class RoutesController {
+  constructor(private readonly routesService: RoutesService) {}
+
+  @Post()
+  create(@Body() dto: CreateRouteDto) {
+    return this.routesService.create(dto);
+  }
+
+  @Get()
+  findAll() {
+    return this.routesService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.routesService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateRouteDto) {
+    return this.routesService.update(+id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.routesService.remove(+id);
+  }
+}

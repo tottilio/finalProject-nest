@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { BusTimeTableController } from './bus-time-table.controller';
-import { BusTimeTableService } from './bus-time-table.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BusTimeTable } from './entities/bus-time-table.entity';
+import { BusTimetableService } from './bus-time-table.service';
+import { BusTimetableController } from './bus-time-table.controller';
 
 @Module({
-  controllers: [BusTimeTableController],
-  providers: [BusTimeTableService]
+  imports: [TypeOrmModule.forFeature([BusTimeTable])],
+  controllers: [BusTimetableController],
+  providers: [BusTimetableService],
 })
-export class BusTimeTableModule {}
+export class BusTimetableModule {}
