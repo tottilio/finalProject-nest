@@ -5,8 +5,8 @@ import { UsersModule } from './users/users.module';
 import { RoutesModule } from './routes/routes.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BusModule } from './bus/bus.module';
-import { BusTimeTableModule } from './bus-time-table/bus-time-table.module';
-import { ReservationsModule } from './reservations/reservations.module';
+import { BusTimetableModule } from './bus-time-table/bus-time-table.module';
+import { ReservationsSeatModule } from './reservations/reservations.module';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -18,8 +18,8 @@ import { ReservationsModule } from './reservations/reservations.module';
     database: "finalproject",
     entities:[],
     autoLoadEntities: true,
-    synchronize: true,
-  }), AuthModule, AdminsModule, UsersModule, RoutesModule, BusModule, BusTimeTableModule, ReservationsModule ], // DB
+    synchronize: true, 
+  }), AuthModule, AdminsModule, UsersModule, RoutesModule, BusModule, BusTimetableModule, ReservationsSeatModule ], // DB
   controllers: [],
   providers: [],
 })

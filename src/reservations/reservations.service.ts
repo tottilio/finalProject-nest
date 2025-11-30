@@ -4,36 +4,72 @@ import { Repository } from 'typeorm';
 import { ReservationSeat } from './entities/reservations.entity';
 import { UpdateReservationSeatDto } from './dto/update-reservation.dto';
 import { CreateReservationSeatDto } from './dto/create-reservation.dto';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class ReservationsSeatService {
   constructor(
     @InjectRepository(ReservationSeat)
     private reservationsRepo: Repository<ReservationSeat>,
+      private dataSource: DataSource,   // <-- añadir esto
   ) {}
 
-  create(dto: CreateReservationSeatDto) {
-    const newReservation = this.reservationsRepo.create(dto);
-    return this.reservationsRepo.save(newReservation);
-  }
+  async create(dto: CreateReservationSeatDto) {
+  const { fk_horarios, reserve_num, fk_users } = dto;
+
+  return await this.dataSource.transaction(async manager => {
+    // 1. Buscar si el asiento ya existe
+    const existing = await manager.findOne(ReservationSeat, {
+      where: { 
+        timetable: { id: fk_horarios },
+        reserve_num 
+      },
+      lock: { mode: 'pessimistic_write' }
+    });
+
+    if (existing) {
+      throw new Error('El asiento ya fue reservado por otro usuario');
+    }
+
+    // 2. Crear reserva asociando RELACIONES, no FKs sueltas.
+    const reservation = manager.create(ReservationSeat, {
+      reserve_num,
+      user: { id: fk_users },
+      timetable: { id: fk_horarios }
+    });
+
+    // 3. Guardar
+    return await manager.save(reservation);
+  });
+}
 
   findAll() {
-    return this.reservationsRepo.find();
+    return this.reservationsRepo.find({
+      relations: ['horario', 'user'],
+    });
   }
 
   async findOne(id: number) {
-    const reservation = await this.reservationsRepo.findOne({ where: { id } });
-    if (!reservation) throw new NotFoundException('Reservation not found');
-    return reservation;
+    const data = await this.reservationsRepo.findOne({
+      where: { id },
+      relations: ['horario', 'user'],
+    });
+
+    if (!data) throw new NotFoundException('Reservation not found');
+
+    return data;
   }
 
   async update(id: number, dto: UpdateReservationSeatDto) {
-    const reservation = await this.findOne(id);
-    return this.reservationsRepo.save({ ...reservation, ...dto });
+    await this.findOne(id); // valida que exista
+    await this.reservationsRepo.update(id, dto);
+
+    return this.findOne(id);
   }
 
   async remove(id: number) {
-    const reservation = await this.findOne(id);
-    return this.reservationsRepo.remove(reservation);
+    await this.findOne(id);
+    return this.reservationsRepo.delete(id);
   }
 }
+

@@ -1,3 +1,4 @@
+import { ReservationSeat } from "src/reservations/entities/reservations.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
@@ -5,10 +6,10 @@ export class User {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column({type: 'varchar', length: 50})
+    @Column({ type: 'varchar', length: 50 })
     name: string
 
-    @Column({type: 'varchar', length: 100 })
+    @Column({ type: 'varchar', length: 100 })
     lastname: string
 
     @Column({
@@ -20,7 +21,7 @@ export class User {
     @Column({ type: 'varchar', length: 500 })
     password: string
 
-    //@OneToMany(() => ReservationSeat, (reservation) => reservation.user)
-    //reservations: ReservationSeat[]
+    @OneToMany(() => ReservationSeat, reservation => reservation.user)
+    reservations: ReservationSeat[];
 
 }

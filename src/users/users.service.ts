@@ -1,17 +1,19 @@
-import { Injectable,BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/users.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ReservationSeat } from 'src/reservations/entities/reservations.entity';
 
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User)
-        private userRepository: Repository<User>
+        private userRepository: Repository<User>,
+        private dataSource: DataSource // <-- necesario para consultar reservas
     ) { }
 
     async create(createUserDto: CreateUserDto) {
@@ -51,7 +53,7 @@ export class UsersService {
         }
 
         await this.userRepository.update(id, updateUserDto);
-        return this.userRepository.findOne({where:{id}});
+        return this.userRepository.findOne({ where: { id } });
     }
 
     async remove(id: number) {
@@ -64,4 +66,22 @@ export class UsersService {
         }
     }
 
+    async getReservationsByUser(userId: number) {
+        // validamos que e xista el usuario
+        const user = await this.findOneById(userId);
+
+        // buscamos sus reservas
+        return await this.dataSource.getRepository(ReservationSeat).find({
+            where: { user: { id: user.id } },
+            relations: [
+                'timetable',
+                'timetable.bus',
+                'timetable.bus.route',
+                'user'
+            ],
+            order: {
+                id: 'DESC'
+            }
+        });
+    }
 }

@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BusTimeTable } from "src/bus-time-table/entities/bus-time-table.entity";
+import { Bus } from "src/bus/entities/bus.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Route {
@@ -13,4 +15,9 @@ export class Route {
 
     @Column({ type: 'varchar' })
     name: string;
+
+    @OneToMany(() => BusTimeTable, timetable => timetable.fk_route)
+    timetables: BusTimeTable[];
+
+    
 }
